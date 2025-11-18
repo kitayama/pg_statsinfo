@@ -14,18 +14,7 @@
 #include "catalog/pg_type_d.h"
 
 /* printf format specifiers for 64-bit integer */
-#ifdef HAVE_LONG_INT_64
-#ifndef HAVE_INT64
-#define PARAMS_FORMAT_CPUSTATS		"(%ld,%ld,%ld,%ld)"
-#endif
-#elif defined(HAVE_LONG_LONG_INT_64)
-#ifndef HAVE_INT64
-#define PARAMS_FORMAT_CPUSTATS		"(%lld,%lld,%lld,%lld)"
-#endif
-#else
-/* neither HAVE_LONG_INT_64 nor HAVE_LONG_LONG_INT_64 */
-#error must have a working 64-bit integer datatype
-#endif
+#define PARAMS_FORMAT_CPUSTATS		"(%" PRId64 ",%" PRId64 ",%" PRId64 ",%" PRId64 ")"
 
 /* snapshot data */
 typedef struct Snap

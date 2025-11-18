@@ -275,8 +275,7 @@ static PlannedStmt * myPlanner(Query *parse,
 
 static void myExecutorRun(QueryDesc *queryDesc,
 				 ScanDirection direction,
-				 uint64 count
-				 ,bool execute_once);
+				 uint64 count);
 static void myExecutorFinish(QueryDesc *queryDesc);
 
 static void statsinfo_rusage_internal(FunctionCallInfo fcinfo);
@@ -1072,16 +1071,15 @@ myExecutorStart(QueryDesc *queryDesc, int eflags)
 static void
 myExecutorRun(QueryDesc *queryDesc,
 				 ScanDirection direction,
-				 uint64 count
-				 ,bool execute_once)
+				 uint64 count)
 {
 	exec_nested_level++;
 	PG_TRY();
 	{
 		if (prev_ExecutorRun_hook)
-			prev_ExecutorRun_hook(queryDesc, direction, count, execute_once);
+			prev_ExecutorRun_hook(queryDesc, direction, count);
 		else
-			standard_ExecutorRun(queryDesc, direction, count, execute_once);
+			standard_ExecutorRun(queryDesc, direction, count);
 		exec_nested_level--;
 	}
 	PG_CATCH();
