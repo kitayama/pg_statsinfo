@@ -294,7 +294,7 @@ static int		long_transaction_max = DEFAULT_LONG_TRANSACTION_MAX;
 static int		controlfile_fsync_interval = DEFAULT_CONTROLFILE_FSYNC_INTERVAL;
 static bool		enable_alert = false;
 static char	   *target_server = NULL;
-bool			wait_sampling_queries = DEFAULT_WAIT_SAMPLING_QUERIES;
+static bool		wait_sampling_queries = DEFAULT_WAIT_SAMPLING_QUERIES;
 int				wait_sampling_max = DEFAULT_WAIT_SAMPLING_MAX;
 bool			wait_sampling_save = true;
 extern wait_samplingSharedState	*wait_sampling;

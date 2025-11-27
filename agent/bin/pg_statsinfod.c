@@ -118,11 +118,11 @@ static pthread_mutex_t	shutdown_state_lock;
 volatile WriterState	writer_state;
 
 /* threads */
-pthread_t	th_collector;
-pthread_t	th_collector_wait_sampling;
-pthread_t	th_writer;
+static pthread_t	th_collector;
+static pthread_t	th_collector_wait_sampling;
+static pthread_t	th_writer;
 pthread_t	th_logger;
-pthread_t	th_logger_send;
+static pthread_t	th_logger_send;
 
 /* signal flag  */
 volatile bool	got_SIGHUP = false;

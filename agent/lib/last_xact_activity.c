@@ -153,12 +153,6 @@ static HTAB *ru_hash = NULL;
 static struct   rusage exec_rusage_start[STATSINFO_RUSAGE_MAX_NESTED_LEVEL];
 static struct   rusage plan_rusage_start[STATSINFO_RUSAGE_MAX_NESTED_LEVEL];
 
-extern int		rusage_max;   /* max entries. TODO: Sould use same setting of pg_stat_statements.max */
-extern bool		rusage_save;
-extern int		rusage_track;		/* tracking level */
-extern bool		rusage_track_planning;	/* whether to track planning duration */
-extern bool		rusage_track_utility;	/* whether to track utility duration */
-
 #define ru_enabled(level) \
 	((rusage_track == STATSINFO_RUSAGE_TRACK_ALL && (level) < STATSINFO_RUSAGE_MAX_NESTED_LEVEL) || \
 	(rusage_track == STATSINFO_RUSAGE_TRACK_TOP && (level) == 0))

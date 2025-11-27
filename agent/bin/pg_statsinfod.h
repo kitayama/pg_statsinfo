@@ -174,9 +174,7 @@ extern volatile ShutdownState	shutdown_state;
 extern volatile WriterState		writer_state;
 
 /* threads */
-extern pthread_t	th_collector;
 extern pthread_t	th_logger;
-extern pthread_t	th_writer;
 
 /* signal flag */
 extern volatile bool	got_SIGHUP;

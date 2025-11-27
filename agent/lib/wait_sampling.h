@@ -4,6 +4,8 @@
  * Copyright (c) 2009-2025, NIPPON TELEGRAPH AND TELEPHONE CORPORATION
  */
 
+ #include "libstatsinfo.h"
+
 /*      
 * For hash table dealloc factors. (same as pg_stat_statements)
 * TODO: should share for wait-sampling-hash-table
@@ -71,3 +73,6 @@ typedef struct wait_samplingSharedState
 	slock_t		mutex;			/* protects following fields only: */
 	wait_samplingGlobalStats stats;		/* global statistics for wait_sampling */
 } wait_samplingSharedState;
+
+/* Backend local variables */
+extern wait_samplingSharedState *wait_sampling;

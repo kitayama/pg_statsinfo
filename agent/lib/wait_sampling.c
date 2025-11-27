@@ -32,10 +32,6 @@ PG_MODULE_MAGIC;
 
 /* Backend local variables */
 wait_samplingSharedState *wait_sampling = NULL;
-extern bool wait_sampling_queries;
-extern int wait_sampling_max;
-extern bool	wait_sampling_save;
-extern HTAB			*wait_sampling_hash;
 
 /* Module callbacks */
 void		init_wait_sampling(void);
