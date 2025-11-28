@@ -395,11 +395,10 @@ $$
 	--
 	-- Data for Name: stat_wal; Type: TABLE DATA; Schema: statsrepo; Owner: postgres
 	--
-	INSERT INTO statsrepo.stat_wal VALUES ($6    , 4320, 504, 4451688, 0, 146, 0, 0, 0, '2012-11-01 00:00:00+09');
-	INSERT INTO statsrepo.stat_wal VALUES ($6 + 1, 218663, 982, 24563492, 338, 521, 0, 0, 0, '2012-11-01 00:00:00+09');
-	INSERT INTO statsrepo.stat_wal VALUES ($6 + 2, 827323, 983, 68873779, 1876, 2085, 0, 0, 0, '2012-11-01 00:00:00+09');
-	INSERT INTO statsrepo.stat_wal VALUES ($6 + 3, 828860, 983, 69090158, 1876, 2096, 0, 0, 0, '2012-11-01 00:00:00+09');
-
+	INSERT INTO statsrepo.stat_wal VALUES ($6    , 4320, 504, 4451688, 0, '2012-11-01 00:00:00+09');
+	INSERT INTO statsrepo.stat_wal VALUES ($6 + 1, 218663, 982, 24563492, 338, '2012-11-01 00:00:00+09');
+	INSERT INTO statsrepo.stat_wal VALUES ($6 + 2, 827323, 983, 68873779, 1876, '2012-11-01 00:00:00+09');
+	INSERT INTO statsrepo.stat_wal VALUES ($6 + 3, 828860, 983, 69090158, 1876, '2012-11-01 00:00:00+09');
 	--
 	-- Data for Name: wait_sampling; Type: TABLE DATA; Schema: statsrepo; Owner: postgres
 	--

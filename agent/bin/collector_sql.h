@@ -106,7 +106,10 @@ SELECT \
 	s.local_blk_read_time, \
 	s.local_blk_write_time, \
 	s.temp_blk_read_time, \
-	s.temp_blk_write_time \
+	s.temp_blk_write_time, \
+	s.wal_buffers_full, \
+	s.parallel_workers_to_launch, \
+	s.parallel_workers_launched \
 FROM \
 	pg_stat_statements s \
 	LEFT JOIN pg_roles r ON r.oid = s.userid \
@@ -287,14 +290,16 @@ SELECT \
 	object, \
 	context, \
 	reads, \
+	read_bytes, \
 	read_time, \
 	writes, \
+	write_bytes, \
 	write_time, \
 	writebacks, \
 	writeback_time, \
 	extends, \
+	extend_bytes, \
 	extend_time, \
-	op_bytes, \
 	hits, \
 	evictions, \
 	reuses, \
@@ -311,10 +316,6 @@ SELECT \
 	wal_fpi, \
 	wal_bytes, \
 	wal_buffers_full, \
-	wal_write, \
-	wal_sync, \
-	wal_write_time, \
-	wal_sync_time, \
 	stats_reset \
 FROM \
 	pg_stat_wal"

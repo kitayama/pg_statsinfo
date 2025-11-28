@@ -291,6 +291,9 @@ CREATE TABLE statsrepo.statement
 	local_blk_write_time	double precision,
 	temp_blk_read_time	double precision,
 	temp_blk_write_time	double precision,
+	wal_buffers_full			bigint,
+	parallel_workers_to_launch	bigint,
+	parallel_workers_launched	bigint,
 	FOREIGN KEY (snapid) REFERENCES statsrepo.snapshot (snapid) ON DELETE CASCADE,
 	FOREIGN KEY (snapid, dbid) REFERENCES statsrepo.database (snapid, dbid)
 );
@@ -636,14 +639,16 @@ CREATE TABLE statsrepo.stat_io
 	object					text,
 	context					text,
 	reads					bigint,
+	read_bytes				numeric,
 	read_time				double precision,
 	writes					bigint,
+	write_bytes				numeric,
 	write_time				double precision,
 	writebacks				bigint,
 	writeback_time			double precision,
 	extends					bigint,
+	extend_bytes				double precision,
 	extend_time				double precision,
-	op_bytes				bigint,
 	hits					bigint,
 	evictions				bigint,
 	reuses					bigint,
@@ -660,10 +665,6 @@ CREATE TABLE statsrepo.stat_wal
 	wal_fpi					bigint,
 	wal_bytes				numeric,
 	wal_buffers_full		bigint,
-	wal_write				bigint,
-	wal_sync				bigint,
-	wal_write_time			double precision,
-	wal_sync_time			double precision,
 	stats_reset				timestamp with time zone,
 	FOREIGN KEY (snapid) REFERENCES statsrepo.snapshot (snapid) ON DELETE CASCADE
 );
@@ -1076,6 +1077,32 @@ CREATE VIEW statsrepo.indexes AS
      AND t.nsp = s.nsp
      AND i.dbid = d.dbid
      AND s.dbid = d.dbid;
+
+-- stat_wal pre-JOINed stat_io
+CREATE VIEW statsrepo.stat_walio AS
+SELECT
+	sw.snapid,
+	sw.wal_records,
+	sw.wal_fpi,
+	sw.wal_bytes,
+	sw.wal_buffers_full,
+	io.wal_write,
+	io.wal_sync,
+	io.wal_write_time,
+	io.wal_sync_time,
+	sw.stats_reset
+FROM
+	statsrepo.stat_wal sw
+	LEFT JOIN
+	(SELECT
+		snapid,
+			pg_catalog.sum(writes) wal_write,
+			pg_catalog.sum(fsyncs) wal_sync,
+			pg_catalog.sum(write_time) wal_write_time,
+			pg_catalog.sum(fsync_time) wal_sync_time
+	 FROM statsrepo.stat_io
+	 WHERE object = 'wal'
+	 GROUP BY snapid) io ON sw.snapid = io.snapid;
 
 -- function to check fillfactor 
 CREATE FUNCTION statsrepo.pg_fillfactor(reloptions text[], relam OID)
@@ -1726,7 +1753,7 @@ $$
 			wal_sync_time,
 			stats_reset
 		 FROM
-		 	statsrepo.stat_wal
+			statsrepo.stat_walio
 		 WHERE
 		 	snapid = $1) b,
 		(SELECT
@@ -1740,7 +1767,7 @@ $$
 			wal_sync_time,
 			stats_reset
 		 FROM
-		 	statsrepo.stat_wal
+			statsrepo.stat_walio
 		 WHERE
 		 	snapid = $2) a;
 $$
@@ -1755,14 +1782,16 @@ CREATE FUNCTION statsrepo.get_stat_io(
 	OUT object				text,
 	OUT context				text,
 	OUT reads				bigint,
+	OUT read_bytes			numeric,
 	OUT read_time			double precision,
 	OUT writes				bigint,
+	OUT write_bytes			numeric,
 	OUT write_time			double precision,
 	OUT writebacks			bigint,
 	OUT writeback_time		double precision,
 	OUT extends				bigint,
+	OUT extend_bytes		numeric,
 	OUT extend_time			double precision,
-	OUT op_bytes			bigint,
 	OUT hits				bigint,
 	OUT evictions			bigint,
 	OUT reuses				bigint,
@@ -1777,14 +1806,16 @@ $$
 		io.object,
 		io.context,
 		(io.reads - COALESCE(pg_catalog.lag(io.reads) OVER w, 0) ),
+		(io.read_bytes - COALESCE(pg_catalog.lag(io.read_bytes) OVER w, 0) )::numeric(30,3),
 		(io.read_time - COALESCE(pg_catalog.lag(io.read_time) OVER w, 0) )::numeric(30,3),
 		(io.writes - COALESCE(pg_catalog.lag(io.writes) OVER w, 0) ),
+		(io.write_bytes - COALESCE(pg_catalog.lag(io.write_bytes) OVER w, 0) )::numeric(30,3),
 		(io.write_time - COALESCE(pg_catalog.lag(io.write_time) OVER w, 0) )::numeric(30,3),
 		(io.writebacks - COALESCE(pg_catalog.lag(io.writebacks) OVER w, 0) ),
 		(io.writeback_time - COALESCE(pg_catalog.lag(io.writeback_time) OVER w, 0) )::numeric(30,3),
 		(io.extends - COALESCE(pg_catalog.lag(io.extends) OVER w, 0) ),
+		(io.extend_bytes - COALESCE(pg_catalog.lag(io.extend_bytes) OVER w, 0) )::numeric(30,3),
 		(io.extend_time - COALESCE(pg_catalog.lag(io.extend_time) OVER w, 0) )::numeric(30,3),
-		op_bytes,
 		(io.hits - COALESCE(pg_catalog.lag(io.hits) OVER w, 0) ),
 		(io.evictions - COALESCE(pg_catalog.lag(io.evictions) OVER w, 0) ),
 		(io.reuses - COALESCE(pg_catalog.lag(io.reuses) OVER w, 0) ),
@@ -1828,7 +1859,7 @@ $$
     (sw.wal_write_time - pg_catalog.lag(sw.wal_write_time) OVER w),
     (sw.wal_sync_time - pg_catalog.lag(sw.wal_sync_time) OVER w)
   FROM
-    statsrepo.stat_wal sw,
+    statsrepo.stat_walio sw,
     statsrepo.snapshot s
   WHERE
     sw.snapid BETWEEN $1 AND $2
@@ -3135,6 +3166,9 @@ CREATE FUNCTION statsrepo.get_query_activity_statements(
 	OUT local_blk_write_time	numeric,
 	OUT tmp_blk_read_time	numeric,
 	OUT tmp_blk_write_time	numeric,
+	OUT wal_buffers_full			bigint,
+	OUT parallel_workers_to_launch	bigint,
+	OUT parallel_workers_launched	bigint,
 	OUT dbid	oid,
 	OUT userid	oid,
 	OUT queryid	bigint,
@@ -3159,6 +3193,9 @@ $$
 		t1.local_blk_write_time::numeric(30, 3),
 		t1.tmp_blk_read_time::numeric(30, 3),
 		t1.tmp_blk_write_time::numeric(30, 3),
+		t1.wal_buffers_full,
+		t1.parallel_workers_to_launch,
+		t1.parallel_workers_launched,
 		t1.dbid,
 		t1.userid,
 		t1.queryid,
@@ -3181,7 +3218,10 @@ $$
 			statsrepo.sub(st2.local_blk_read_time, st1.local_blk_read_time) AS local_blk_read_time,
 			statsrepo.sub(st2.local_blk_write_time, st1.local_blk_write_time) AS local_blk_write_time,
 			statsrepo.sub(st2.temp_blk_read_time, st1.temp_blk_read_time) AS tmp_blk_read_time,
-			statsrepo.sub(st2.temp_blk_write_time, st1.temp_blk_write_time) AS tmp_blk_write_time
+			statsrepo.sub(st2.temp_blk_write_time, st1.temp_blk_write_time) AS tmp_blk_write_time,
+			statsrepo.sub(st2.wal_buffers_full, st1.wal_buffers_full) AS wal_buffers_full,
+			statsrepo.sub(st2.parallel_workers_to_launch, st1.parallel_workers_to_launch) AS parallel_workers_to_launch,
+			statsrepo.sub(st2.parallel_workers_launched, st1.parallel_workers_launched) AS parallel_workers_launched
 		 FROM
 		 	(SELECT
 		 		s.dbid,
