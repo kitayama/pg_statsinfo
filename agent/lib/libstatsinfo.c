@@ -96,22 +96,26 @@
 /* log_autovacuum_min_duration: vacuum */
 #define MSG_AUTOVACUUM \
 	"%s vacuum%s \"%s.%s.%s\": index scans: %d\n" \
-	"pages: %u removed, %u remain, %u scanned (%.2f%% of total)\n" \
-	"tuples: %lld removed, %lld remain, %lld are dead but not yet removable\n" \
+	"pages: %u removed, %u remain, %u scanned (%.2f%% of total), %u eagerly scanned\n" \
+	"tuples: %" PRId64 " removed, %" PRId64 " remain, %" PRId64 " are dead but not yet removable\n" \
 	"%s" \
 	"removable cutoff: %u, which was %d XIDs old when operation ended\n" \
 	"%s" \
 	"avg read rate: %.3f %s, avg write rate: %.3f %s\n" \
-	"buffer usage: %lld hits, %lld misses, %lld dirtied\n" \
-	"WAL usage: %lld records, %lld full page images, %llu bytes\n" \
+	"buffer usage: %" PRId64 " hits, %" PRId64 " reads, %" PRId64 " dirtied\n" \
+	"WAL usage: %" PRId64 " records, %" PRId64 " full page images, %" PRIu64 " bytes, %" PRId64 " buffers full\n" \
 	"system usage: %s"
 
 /* log_autovacuum_min_duration: analyze */
+/* finished analyzing table \"%s.%s.%s\"\n
+ * automatic analyze of table \"%s.%s.%s\"\n
+ */
 #define MSG_AUTOANALYZE \
-	"automatic analyze of table \"%s.%s.%s\"\n" \
+	"%s analyz%s table \"%s.%s.%s\"\n" \
 	"%s" \
 	"avg read rate: %.3f %s, avg write rate: %.3f %s\n" \
-	"buffer usage: %lld hits, %lld misses, %lld dirtied\n" \
+	"buffer usage: %" PRId64 " hits, %" PRId64 " reads, %" PRId64 " dirtied\n" \
+	"WAL usage: %" PRId64 " records, %" PRId64 " full page images, %" PRIu64 " bytes, %" PRId64 " buffers full\n" \
 	"system usage: %s"
 
 /* log_checkpoint: staring */

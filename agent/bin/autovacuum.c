@@ -14,7 +14,7 @@ INSERT INTO statsrepo.autovacuum VALUES \
 
 #define SQL_INSERT_AUTOANALYZE "\
 INSERT INTO statsrepo.autoanalyze VALUES \
-($1, $2::timestamptz - interval '1sec' * $11, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)" 
+($1, $2::timestamptz - interval '1sec' * $11, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)"
 
 #define SQL_INSERT_AUTOVACUUM_CANCEL "\
 INSERT INTO statsrepo.autovacuum_cancel VALUES \
@@ -44,6 +44,10 @@ INSERT INTO statsrepo.autoanalyze_cancel VALUES \
 #define MSG_FROZENPAGE \
 	"frozen: %u pages from table (%.2f%% of total) had %lld tuples frozen"
 
+/* visibility map */
+#define MSG_VISIBILITY_MAP \
+	"visibility map: %u pages set all-visible, %u pages set all-frozen (%u were all-visible)"
+
 /* index scan (index scan is not localized) */
 #define MSG_INDEX_SCAN \
 	"index scan %s: %u pages from table (%.2f%% of total) %s %lld dead item %s"
@@ -57,6 +61,10 @@ INSERT INTO statsrepo.autoanalyze_cancel VALUES \
 #define MSG_INDEXES \
 	"index \"%s\": pages: %u in total, %u newly deleted, %u currently deleted, %u reusable"
 
+/* delay time */
+#define MSG_DELAY_TIME \
+	"delay time: %.3f ms"
+
 /* I/O Timngs (I/O Timngs is not localized) */
 #define MSG_IO_TIMING \
 	"I/O timings: read: %.3f ms, write: %.3f ms"
@@ -69,20 +77,22 @@ INSERT INTO statsrepo.autoanalyze_cancel VALUES \
 #define MSG_AUTOVACUUM_CANCEL \
 	"canceling autovacuum task"
 
-#define NUM_AUTOVACUUM				28
-#define IDX_AUTOVACUUM_TUPLES_MISS	13
-#define IDX_AUTOVACUUM_OPTIONAL		16
-#define IDX_AUTOVACUUM_RUSAGE		27
-#define NUM_AUTOANALYZE				12
-#define IDX_AUTOANALYZE_RUSAGE		11
-#define IDX_AUTOANALYZE_OPTIONAL	3
+#define NUM_AUTOVACUUM				30
+#define IDX_AUTOVACUUM_TUPLES_MISS	14
+#define IDX_AUTOVACUUM_OPTIONAL		17
+#define IDX_AUTOVACUUM_RUSAGE		29
+#define NUM_AUTOANALYZE				18
+#define IDX_AUTOANALYZE_RUSAGE		17
+#define IDX_AUTOANALYZE_OPTIONAL	5
 
 #define NUM_TUPLES_MISS				2
 #define NUM_FROZENXID				2
 #define NUM_MINMXID					2
 #define NUM_FROZENPAGE				3
+#define NUM_VISIBILITY_MAP			3
 #define NUM_INDEX_SCAN				6
 #define NUM_INDEXES					5
+#define NUM_DELAY_TIME				1
 #define NUM_IO_TIMING				2
 #define NUM_RUSAGE					3
 #define NUM_AUTOVACUUM_CANCEL		5
@@ -147,8 +157,10 @@ parse_autovacuum(const char *message, const char *timestamp)
 	List		   *frozen_xid  = NIL;
 	List		   *relmin_mxid = NIL;
 	List		   *frozen_page = NIL;
+	List		   *visibility_map = NIL;
 	List		   *index_scan = NIL;
 	List		   *indexes    = NIL;
+	List		   *dilay_time = NIL;
 	List		   *io_timing  = NIL;
 	const char	   *str_usage;
 	QueueItemExec	exec;
@@ -188,8 +200,14 @@ parse_autovacuum(const char *message, const char *timestamp)
 				frozen_xid = lappend( frozen_xid, NULL );
 			for( int i=0; i<NUM_MINMXID; i++)
 				relmin_mxid = lappend( relmin_mxid, NULL );
+			for( int i=0; i<NUM_FROZENPAGE; i++ )
+				frozen_page = lappend( frozen_page, NULL );
+			for ( int i=0; i<NUM_VISIBILITY_MAP; i++)
+				visibility_map = lappend( visibility_map, NULL);
 			for( int i=0; i<NUM_INDEX_SCAN; i++)
 				index_scan = lappend( index_scan, NULL );
+			for ( int i=0; i<NUM_DELAY_TIME; i++)
+				dilay_time = lappend( dilay_time, NULL);
 			for( int i=0; i<NUM_IO_TIMING; i++)
 				io_timing = lappend( io_timing, NULL );
 
@@ -250,6 +268,17 @@ parse_autovacuum(const char *message, const char *timestamp)
 			{
 				for( int i=0; i<NUM_FROZENPAGE; i++ )
 					frozen_page = lappend( frozen_page, NULL );
+			}
+
+			/* Re-parse visibility map output separatedly. */
+			if (tok && ((visibility_map = capture( tok, MSG_VISIBILITY_MAP, NUM_VISIBILITY_MAP)) != NIL)){
+				/* Get autovacuum message for next line. */
+				tok = strtok(NULL, "\n");
+			}
+			else
+			{
+				for( int i=0; i<NUM_VISIBILITY_MAP; i++ )
+					visibility_map = lappend( visibility_map, NULL );
 			}
 
 			/* Re-parse index scan output separatedly. */
@@ -332,7 +361,19 @@ parse_autovacuum(const char *message, const char *timestamp)
 			strcat( index_pages_new_del,     "}" );
 			strcat( index_pages_current_del, "}" );
 			strcat( index_pages_reusable,    "}" );
-		
+
+			/* Re-parse delay time output separatedly. */
+			if (tok && ((dilay_time = capture( tok, MSG_DELAY_TIME, NUM_DELAY_TIME)) != NIL))
+			{
+				/* Get autovacuum message for next line. */
+				tok = strtok(NULL, "\n");
+			}
+			else
+			{
+				for( int i=0; i<NUM_DELAY_TIME; i++ )
+					dilay_time = lappend( dilay_time, NULL );
+			}
+
 			/* Re-parse I/O timings output separatedly. */
 			if ( tok && (strlen(tok) > 0) )
 			{
@@ -377,22 +418,47 @@ parse_autovacuum(const char *message, const char *timestamp)
 		exec = (QueueItemExec) Autoanalyze_exec;
 		idx_rusage = IDX_AUTOANALYZE_RUSAGE;
 
-		/* Re-parse I/O timings. */
+		/* Re-parse optional statements in autovacuum messages. */
 		str_optional = (char*)list_nth( params, IDX_AUTOANALYZE_OPTIONAL );
 		if( strlen(str_optional) == 0)
 		{
-			/* Empty I/O timing Information. */
+			/* Empty list with the same number of elements. */
+			for ( int i=0; i<NUM_DELAY_TIME; i++)
+				dilay_time = lappend( dilay_time, NULL);
 			for( int i=0; i<NUM_IO_TIMING; i++)
 				io_timing = lappend( io_timing, NULL );
 		}
 		else
 		{
-			if (str_optional[strlen(str_optional) - 1] == '\n')
-				str_optional[strlen(str_optional) - 1] = '\0';
-			
-			if ((io_timing = capture( str_optional, MSG_IO_TIMING, NUM_IO_TIMING )) == NIL )
+			char *tok = strtok(str_optional, "\n");
+
+			/* Re-parse delay time output separatedly. */
+			if (tok && ((dilay_time = capture( tok, MSG_DELAY_TIME, NUM_DELAY_TIME)) != NIL))
 			{
-				elog(WARNING, "The optional string in the autoanalyze log cannot be parsed.: %s", str_optional);
+				/* Get autovacuum message for next line. */
+				tok = strtok(NULL, "\n");
+			}
+			else
+			{
+				for( int i=0; i<NUM_DELAY_TIME; i++ )
+					dilay_time = lappend( dilay_time, NULL );
+			}
+
+			/* Re-parse I/O timings output separatedly. */
+			if ( tok && (strlen(tok) > 0) )
+			{
+				if ( (io_timing = capture( tok, MSG_IO_TIMING, NUM_IO_TIMING )) != NIL )
+					tok = strtok(NULL, "\n");
+				else
+				{
+					elog(WARNING, "The optional string in the autoanalyze log cannot be parsed.: %s", str_optional);
+					/* Empty I/O timing Information. */
+					for( int i=0; i<NUM_IO_TIMING; i++)
+						io_timing = lappend( io_timing, NULL );
+				}
+			}
+			else
+			{
 				/* Empty I/O timing Information. */
 				for( int i=0; i<NUM_IO_TIMING; i++)
 					io_timing = lappend( io_timing, NULL );
@@ -416,8 +482,10 @@ parse_autovacuum(const char *message, const char *timestamp)
 		list_free_deep(frozen_xid);
 		list_free_deep(relmin_mxid);
 		list_free_deep(frozen_page);
+		list_free_deep(visibility_map);
 		list_free_deep(index_scan);
 		list_free_deep(indexes);
+		list_free_deep(dilay_time);
 		list_free_deep(io_timing);
 		return false;	/* should not happen */
 	}
@@ -433,8 +501,10 @@ parse_autovacuum(const char *message, const char *timestamp)
 	av->params = list_concat(params, frozen_xid);
 	av->params = list_concat(params, relmin_mxid);
 	av->params = list_concat(params, frozen_page);
+	av->params = list_concat(params, visibility_map);
 	av->params = list_concat(params, index_scan);
 	av->params = list_concat(params, indexes);
+	av->params = list_concat(params, dilay_time);
 	av->params = list_concat(params, io_timing);
 
 	writer_send((QueueItem *) av);
@@ -564,8 +634,8 @@ Autovacuum_exec(AutovacuumLog *av, PGconn *conn, const char *instid)
 
 	elog(DEBUG2, "write (autovacuum)");
 	Assert(list_length(av->params) == NUM_AUTOVACUUM + NUM_RUSAGE + NUM_TUPLES_MISS + 
-	                                  NUM_FROZENXID + NUM_MINMXID + NUM_FROZENPAGE  + 
-									  NUM_INDEX_SCAN + NUM_INDEXES + NUM_IO_TIMING);
+									  NUM_FROZENXID + NUM_MINMXID + NUM_FROZENPAGE  + NUM_VISIBILITY_MAP +
+									  NUM_INDEX_SCAN + NUM_INDEXES + NUM_DELAY_TIME + NUM_IO_TIMING);
 
 	memset(params, 0, sizeof(params));
 
@@ -579,18 +649,18 @@ Autovacuum_exec(AutovacuumLog *av, PGconn *conn, const char *instid)
 	params[7] = list_nth(av->params, 7);	/* page_remain */
 	params[8] = list_nth(av->params, 8);	/* tbl_scan_page */
 	params[9] = list_nth(av->params, 9);	/* tbl_scan_page_ratio */
-	params[10] = list_nth(av->params, 10);	/* tup_removed */
-	params[11] = list_nth(av->params, 11);	/* tup_remain */
-	params[12] = list_nth(av->params, 12);	/* tup_dead */
-	params[13] = list_nth(av->params, 14);	/* removable_cutoff */
-	params[14] = list_nth(av->params, 17);	/* read_rate */
-	params[15] = list_nth(av->params, 19);	/* write_rate */
-	params[16] = list_nth(av->params, 21);	/* page_hit */
-	params[17] = list_nth(av->params, 22);	/* page_miss */
-	params[18] = list_nth(av->params, 23);	/* page_dirty */
-	params[19] = list_nth(av->params, 24);	/* wal_records */
-	params[20] = list_nth(av->params, 25);	/* wal_page_images */
-	params[21] = list_nth(av->params, 26);	/* wal_bytes */
+	params[10] = list_nth(av->params, 11);	/* tup_removed */
+	params[11] = list_nth(av->params, 12);	/* tup_remain */
+	params[12] = list_nth(av->params, 13);	/* tup_dead */
+	params[13] = list_nth(av->params, 15);	/* removable_cutoff */
+	params[14] = list_nth(av->params, 18);	/* read_rate */
+	params[15] = list_nth(av->params, 20);	/* write_rate */
+	params[16] = list_nth(av->params, 22);	/* page_hit */
+	params[17] = list_nth(av->params, 23);	/* page_read */
+	params[18] = list_nth(av->params, 24);	/* page_dirty */
+	params[19] = list_nth(av->params, 25);	/* wal_records */
+	params[20] = list_nth(av->params, 26);	/* wal_page_images */
+	params[21] = list_nth(av->params, 27);	/* wal_bytes */
 
 	/* Index offset in params : rusage */
 	idx_offset = NUM_AUTOVACUUM;
@@ -609,21 +679,21 @@ Autovacuum_exec(AutovacuumLog *av, PGconn *conn, const char *instid)
 	idx_offset = NUM_AUTOVACUUM + NUM_RUSAGE + NUM_TUPLES_MISS + NUM_FROZENXID;
 	params[26] = list_nth(av->params, idx_offset + 1);	/* new_relminmxid */
 
-	/* Index offset in params : frozen pates */
+	/* Index offset in params : frozen pages */
 	idx_offset = NUM_AUTOVACUUM + NUM_RUSAGE + NUM_TUPLES_MISS + NUM_FROZENXID + NUM_MINMXID;
 	params[27] = list_nth(av->params, idx_offset + 0); /* frozen_pages */
 	params[28] = list_nth(av->params, idx_offset + 1); /* frozen_pages_ratio */
 	params[29] = list_nth(av->params, idx_offset + 2); /* frozen_tuples */
 
 	/* Index offset in params : index scan */
-	idx_offset = NUM_AUTOVACUUM + NUM_RUSAGE + NUM_TUPLES_MISS + NUM_FROZENXID + NUM_MINMXID + NUM_FROZENPAGE;
+	idx_offset = NUM_AUTOVACUUM + NUM_RUSAGE + NUM_TUPLES_MISS + NUM_FROZENXID + NUM_MINMXID + NUM_FROZENPAGE + NUM_VISIBILITY_MAP;
 	params[30] = list_nth(av->params, idx_offset + 0);	/* index_scan_ptn */
 	params[31] = list_nth(av->params, idx_offset + 1);	/* dead_lp_pages */
 	params[32] = list_nth(av->params, idx_offset + 2);	/* dead_lp_pages_ratio */
 	params[33] = list_nth(av->params, idx_offset + 4);	/* dead_lp */
 
 	/* Index offset in params : indexes */
-	idx_offset = NUM_AUTOVACUUM + NUM_RUSAGE + NUM_TUPLES_MISS + NUM_FROZENXID + NUM_MINMXID + NUM_FROZENPAGE + NUM_INDEX_SCAN;
+	idx_offset = NUM_AUTOVACUUM + NUM_RUSAGE + NUM_TUPLES_MISS + NUM_FROZENXID + NUM_MINMXID + NUM_FROZENPAGE + NUM_VISIBILITY_MAP + NUM_INDEX_SCAN;
 	params[34] = list_nth(av->params, idx_offset + 0);	/* index_names */
 	params[35] = list_nth(av->params, idx_offset + 1);	/* index_pages_total */
 	params[36] = list_nth(av->params, idx_offset + 2);	/* index_pages_new_del */
@@ -631,7 +701,7 @@ Autovacuum_exec(AutovacuumLog *av, PGconn *conn, const char *instid)
 	params[38] = list_nth(av->params, idx_offset + 4);	/* index_pages_reusable */
 
 	/* Index offset in params : I/O timings */
-	idx_offset = NUM_AUTOVACUUM + NUM_RUSAGE + NUM_TUPLES_MISS + NUM_FROZENXID + NUM_MINMXID + NUM_FROZENPAGE + NUM_INDEX_SCAN + NUM_INDEXES;
+	idx_offset = NUM_AUTOVACUUM + NUM_RUSAGE + NUM_TUPLES_MISS + NUM_FROZENXID + NUM_MINMXID + NUM_FROZENPAGE + NUM_VISIBILITY_MAP + NUM_INDEX_SCAN + NUM_INDEXES + NUM_DELAY_TIME;
 	params[39] = list_nth(av->params, idx_offset + 0);	/* io_timings_read */
 	params[40] = list_nth(av->params, idx_offset + 1);	/* io_timings_write */
 
@@ -642,24 +712,27 @@ Autovacuum_exec(AutovacuumLog *av, PGconn *conn, const char *instid)
 static bool
 Autoanalyze_exec(AutovacuumLog *av, PGconn *conn, const char *instid)
 {
-	const char	   *params[13];
+	const char	   *params[16];
 
 	elog(DEBUG2, "write (autoanalyze)");
-	Assert(list_length(av->params) == NUM_AUTOANALYZE + NUM_RUSAGE + NUM_IO_TIMING);
+	Assert(list_length(av->params) == NUM_AUTOANALYZE + NUM_RUSAGE + NUM_DELAY_TIME + NUM_IO_TIMING);
 
 	params[0] = instid;
 	params[1] = av->finish;					/* finish */
-	params[2] = list_nth(av->params, 0);	/* database */
-	params[3] = list_nth(av->params, 1);	/* schema */
-	params[4] = list_nth(av->params, 2);	/* table */
-	params[5] = list_nth(av->params, 8);	/* page_hit */
-	params[6] = list_nth(av->params, 9);	/* page_miss */ 
-	params[7] = list_nth(av->params, 10);	/* page_dirty */
-	params[8] = list_nth(av->params, 4);	/* read_rate */
-	params[9] = list_nth(av->params, 6);	/* write_rate */
-	params[10] = list_nth(av->params, NUM_AUTOANALYZE + 2);	/* duration */
-	params[11] = list_nth(av->params, NUM_AUTOANALYZE + NUM_RUSAGE + 0);	/* io_timings_read */
-	params[12] = list_nth(av->params, NUM_AUTOANALYZE + NUM_RUSAGE + 1);	/* io_timings_write */
+	params[2] = list_nth(av->params, 2);	/* database */
+	params[3] = list_nth(av->params, 3);	/* schema */
+	params[4] = list_nth(av->params, 4);	/* table */
+	params[5] = list_nth(av->params, 10);	/* page_hit */
+	params[6] = list_nth(av->params, 11);	/* page_read */
+	params[7] = list_nth(av->params, 12);	/* page_dirty */
+	params[8] = list_nth(av->params, 6);	/* read_rate */
+	params[9] = list_nth(av->params, 8);	/* write_rate */
+	params[10] = list_nth(av->params, 13);	/* wal_records */
+	params[11] = list_nth(av->params, 14);	/* wal_page_images */
+	params[12] = list_nth(av->params, 15);	/* wal_bytes */
+	params[13] = list_nth(av->params, NUM_AUTOANALYZE + 2);	/* duration */
+	params[14] = list_nth(av->params, NUM_AUTOANALYZE + NUM_RUSAGE + NUM_DELAY_TIME + 0);	/* io_timings_read */
+	params[15] = list_nth(av->params, NUM_AUTOANALYZE + NUM_RUSAGE + NUM_DELAY_TIME + 1);	/* io_timings_write */
 	
 	return pgut_command(conn, SQL_INSERT_AUTOANALYZE,
 						lengthof(params), params) == PGRES_COMMAND_OK;

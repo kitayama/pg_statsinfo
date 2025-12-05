@@ -107,7 +107,7 @@ FROM \
 SELECT \
 	datname || '.' || nspname || '.' || relname, \
 	avg_page_hit, \
-	avg_page_miss, \
+	avg_page_read, \
 	avg_page_dirty, \
 	avg_read_rate, \
 	avg_write_rate, \
@@ -1110,7 +1110,7 @@ report_autovacuum_activity(PGconn *conn, ReportScope *scope, FILE *out)
 	fprintf(out, "/** Vacuum I/O Statistics (Average) **/\n");
 	fprintf(out, "-----------------------------------\n");
 	fprintf(out, "%-40s  %10s  %10s  %10s  %13s  %13s  %14s  %14s\n",
-		"Table", "Page Hit", "Page Miss", "Page Dirty", "Read Rate", "Write Rate", "Read Duration", "Write Duration");
+		"Table", "Page Hit", "Page Read", "Page Dirty", "Read Rate", "Write Rate", "Read Duration", "Write Duration");
 	fprintf(out, "---------------------------------------------------------------------------------------------------------------------------------------------\n");
 
 	res = pgut_execute(conn, SQL_SELECT_AUTOVACUUM_ACTIVITY2, lengthof(params), params);
