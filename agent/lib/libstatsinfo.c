@@ -124,7 +124,7 @@
 
 /* log_checkpoint: complete */
 #define MSG_CHECKPOINT_COMPLETE \
-	"checkpoint complete: wrote %d buffers (%.1f%%); " \
+	"checkpoint complete: wrote %d buffers (%.1f%%), wrote %d SLRU buffers; " \
 	"%d WAL file(s) added, %d removed, %d recycled; " \
 	"write=%ld.%03d s, sync=%ld.%03d s, total=%ld.%03d s; " \
 	"sync files=%d, longest=%ld.%03d s, average=%ld.%03d s; " \
@@ -132,7 +132,7 @@
 
 /* log_restartpoint: complete */
 #define MSG_RESTARTPOINT_COMPLETE \
-	"restartpoint complete: wrote %d buffers (%.1f%%); " \
+	"restartpoint complete: wrote %d buffers (%.1f%%), wrote %d SLRU buffers; " \
 	"%d WAL file(s) added, %d removed, %d recycled; " \
 	"write=%ld.%03d s, sync=%ld.%03d s, total=%ld.%03d s; " \
 	"sync files=%d, longest=%ld.%03d s, average=%ld.%03d s; " \
