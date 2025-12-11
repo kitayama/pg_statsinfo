@@ -51,14 +51,14 @@ $$
 	--
 	-- Data for Name: autoanalyze; Type: TABLE DATA; Schema: statsrepo; Owner: postgres
 	--
-	INSERT INTO statsrepo.autoanalyze VALUES ($1, '2012-11-01 00:00:30+09', 'postgres', 'public', 'pgbench_branches', 0,0,0,0,0, 0.841124545,  0.1,0.0);
-	INSERT INTO statsrepo.autoanalyze VALUES ($1, '2012-11-01 00:00:30+09', 'postgres', 'public', 'pgbench_tellers',  0,0,0,0,0, 0.0154855544, 0.2,0.1);
-	INSERT INTO statsrepo.autoanalyze VALUES ($1, '2012-11-01 00:00:30+09', 'postgres', 'public', 'pgbench_history',  0,0,0,0,0, 0.0700000003, 0.3,0.0);
-	INSERT INTO statsrepo.autoanalyze VALUES ($1, '2012-11-01 00:00:30+09', 'postgres', 'public', 'pgbench_accounts', 0,0,0,0,0, 0.389999986,  0.4,0.2);
-	INSERT INTO statsrepo.autoanalyze VALUES ($1, '2012-11-01 00:01:30+09', 'postgres', 'public', 'pgbench_branches', 0,0,0,0,0, 0.845144487,  0.5,0.0);
-	INSERT INTO statsrepo.autoanalyze VALUES ($1, '2012-11-01 00:01:30+09', 'postgres', 'public', 'pgbench_tellers',  0,0,0,0,0, 0.0154854855, 0.6,0.3);
-	INSERT INTO statsrepo.autoanalyze VALUES ($1, '2012-11-01 00:01:30+09', 'postgres', 'public', 'pgbench_history',  0,0,0,0,0, 0.159999996,  0.7,0.0);
-	INSERT INTO statsrepo.autoanalyze VALUES ($1, '2012-11-01 00:01:30+09', 'postgres', 'public', 'pgbench_accounts', 0,0,0,0,0, 0.280000001,  0.8,0.4);
+	INSERT INTO statsrepo.autoanalyze VALUES ($1, '2012-11-01 00:00:30+09', 'postgres', 'public', 'pgbench_branches', 0,0,0,0,0,0,0,0, 0.841124545,  0.1, 0.0);
+	INSERT INTO statsrepo.autoanalyze VALUES ($1, '2012-11-01 00:00:30+09', 'postgres', 'public', 'pgbench_tellers',  0,0,0,0,0,0,0,0, 0.0154855544, 0.2, 0.1);
+	INSERT INTO statsrepo.autoanalyze VALUES ($1, '2012-11-01 00:00:30+09', 'postgres', 'public', 'pgbench_history',  0,0,0,0,0,0,0,0, 0.0700000003, 0.3, 0.0);
+	INSERT INTO statsrepo.autoanalyze VALUES ($1, '2012-11-01 00:00:30+09', 'postgres', 'public', 'pgbench_accounts', 0,0,0,0,0,0,0,0, 0.389999986,  0.4, 0.2);
+	INSERT INTO statsrepo.autoanalyze VALUES ($1, '2012-11-01 00:01:30+09', 'postgres', 'public', 'pgbench_branches', 0,0,0,0,0,0,0,0, 0.845144487,  0.5, 0.0);
+	INSERT INTO statsrepo.autoanalyze VALUES ($1, '2012-11-01 00:01:30+09', 'postgres', 'public', 'pgbench_tellers',  0,0,0,0,0,0,0,0, 0.0154854855, 0.6, 0.3);
+	INSERT INTO statsrepo.autoanalyze VALUES ($1, '2012-11-01 00:01:30+09', 'postgres', 'public', 'pgbench_history',  0,0,0,0,0,0,0,0, 0.159999996,  0.7, 0.0);
+	INSERT INTO statsrepo.autoanalyze VALUES ($1, '2012-11-01 00:01:30+09', 'postgres', 'public', 'pgbench_accounts', 0,0,0,0,0,0,0,0, 0.280000001,  0.8, 0.4);
 
 	--
 	-- Data for Name: autoanalyze_cancel; Type: TABLE DATA; Schema: statsrepo; Owner: postgres
@@ -90,6 +90,11 @@ $$
 	INSERT INTO statsrepo.stat_io (snapid, backend_type, object, context, writes, fsyncs) VALUES ($6 + 1, 'client backend', 'relation', 'normal', 6000, 60);
 	INSERT INTO statsrepo.stat_io (snapid, backend_type, object, context, writes, fsyncs) VALUES ($6 + 2, 'client backend', 'relation', 'normal', 24000, 240);
 	INSERT INTO statsrepo.stat_io (snapid, backend_type, object, context, writes, fsyncs) VALUES ($6 + 3, 'client backend', 'relation', 'normal', 36000, 360);
+
+	INSERT INTO statsrepo.stat_io (snapid, backend_type, object, context, writes, fsyncs, write_time, fsync_time) VALUES ($6 + 0, 'client backend', 'wal', 'normal', 146, 0, 0,0);
+	INSERT INTO statsrepo.stat_io (snapid, backend_type, object, context, writes, fsyncs, write_time, fsync_time) VALUES ($6 + 1, 'client backend', 'wal', 'normal', 521, 0, 0, 0);
+	INSERT INTO statsrepo.stat_io (snapid, backend_type, object, context, writes, fsyncs, write_time, fsync_time) VALUES ($6 + 2, 'client backend', 'wal', 'normal', 2085, 0, 0, 0);
+	INSERT INTO statsrepo.stat_io (snapid, backend_type, object, context, writes, fsyncs, write_time, fsync_time) VALUES ($6 + 3, 'client backend', 'wal', 'normal', 2096, 0, 0, 0);
 
 	--
 	-- Data for Name: autovacuum_cancel; Type: TABLE DATA; Schema: statsrepo; Owner: postgres

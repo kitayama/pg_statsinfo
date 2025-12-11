@@ -236,7 +236,7 @@ SELECT
 	CASE WHEN tup_remain IS NOT NULL THEN 'xxx' END AS tup_remain,
 	${SELECT_TUP_DEAD} AS tup_dead,
 	CASE WHEN page_hit IS NOT NULL THEN 'xxx' END AS page_hit,
-	CASE WHEN page_miss IS NOT NULL THEN 'xxx' END AS page_miss,
+	CASE WHEN page_read IS NOT NULL THEN 'xxx' END AS page_read,
 	CASE WHEN page_dirty IS NOT NULL THEN 'xxx' END AS page_dirty,
 	CASE WHEN read_rate IS NOT NULL THEN 'xxx' END AS read_rate,
 	CASE WHEN write_rate IS NOT NULL THEN 'xxx' END AS write_rate,

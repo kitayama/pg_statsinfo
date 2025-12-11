@@ -115,6 +115,7 @@ vacuumdb: vacuuming database "template1"
       1 | pg_read_all_settings        | xxx
       1 | pg_read_all_stats           | xxx
       1 | pg_read_server_files        | xxx
+      1 | pg_signal_autovacuum_worker | xxx
       1 | pg_signal_backend           | xxx
       1 | pg_stat_scan_tables         | xxx
       1 | pg_use_reserved_connections | xxx
@@ -122,7 +123,7 @@ vacuumdb: vacuuming database "template1"
       1 | pg_write_server_files       | xxx
       1 | postgres                    | xxx
       1 | user01                      | xxx
-(17 rows)
+(18 rows)
 
 /**--- GUC setting ---**/
  snapid |       name        | setting | unit |       source       
@@ -190,8 +191,8 @@ DROP TABLE
 
 /**--- Statistics of query ---**/
 /***-- pg_stat_statements is not installed --***/
- snapid | dbid | userid | queryid | query | plans | total_plan_time | calls | total_exec_time | rows | shared_blks_hit | shared_blks_read | shared_blks_dirtied | shared_blks_written | local_blks_hit | local_blks_read | local_blks_dirtied | local_blks_written | temp_blks_read | temp_blks_written | shared_blk_read_time | shared_blk_write_time | local_blk_read_time | local_blk_write_time | temp_blk_read_time | temp_blk_write_time 
---------+------+--------+---------+-------+-------+-----------------+-------+-----------------+------+-----------------+------------------+---------------------+---------------------+----------------+-----------------+--------------------+--------------------+----------------+-------------------+----------------------+-----------------------+---------------------+----------------------+--------------------+---------------------
+ snapid | dbid | userid | queryid | query | plans | total_plan_time | calls | total_exec_time | rows | shared_blks_hit | shared_blks_read | shared_blks_dirtied | shared_blks_written | local_blks_hit | local_blks_read | local_blks_dirtied | local_blks_written | temp_blks_read | temp_blks_written | shared_blk_read_time | shared_blk_write_time | local_blk_read_time | local_blk_write_time | temp_blk_read_time | temp_blk_write_time | wal_buffers_full | parallel_workers_to_launch | parallel_workers_launched 
+--------+------+--------+---------+-------+-------+-----------------+-------+-----------------+------+-----------------+------------------+---------------------+---------------------+----------------+-----------------+--------------------+--------------------+----------------+-------------------+----------------------+-----------------------+---------------------+----------------------+--------------------+---------------------+------------------+----------------------------+---------------------------
 (0 rows)
 
 /***-- pg_stat_statements is installed --***/

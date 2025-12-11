@@ -1753,7 +1753,7 @@ postgres.statsrepo.column_20221219              1        0        1       0.0   
 
 /** Vacuum I/O Statistics (Average) **/
 -----------------------------------
-Table                                       Page Hit   Page Miss  Page Dirty      Read Rate     Write Rate   Read Duration  Write Duration
+Table                                       Page Hit   Page Read  Page Dirty      Read Rate     Write Rate   Read Duration  Write Duration
 ---------------------------------------------------------------------------------------------------------------------------------------------
 postgres.pg_catalog.pg_attribute             145.000      14.000       0.000  122.070 MiB/s    0.000 MiB/s         0.118 s         0.000 s
 postgres.public.pgbench_history              145.000       2.000       4.000    8.351 MiB/s   16.702 MiB/s         0.012 s         0.000 s
@@ -1814,7 +1814,7 @@ postgres.statsrepo.column_20221219              1        0        1       0.0   
 
 /** Vacuum I/O Statistics (Average) **/
 -----------------------------------
-Table                                       Page Hit   Page Miss  Page Dirty      Read Rate     Write Rate   Read Duration  Write Duration
+Table                                       Page Hit   Page Read  Page Dirty      Read Rate     Write Rate   Read Duration  Write Duration
 ---------------------------------------------------------------------------------------------------------------------------------------------
 postgres.pg_catalog.pg_attribute             145.000      14.000       0.000  122.070 MiB/s    0.000 MiB/s         0.118 s         0.000 s
 postgres.public.pgbench_history              145.000       2.000       4.000    8.351 MiB/s   16.702 MiB/s         0.012 s         0.000 s
@@ -1875,7 +1875,7 @@ postgres.statsrepo.column_20221219              1        0        1       0.0   
 
 /** Vacuum I/O Statistics (Average) **/
 -----------------------------------
-Table                                       Page Hit   Page Miss  Page Dirty      Read Rate     Write Rate   Read Duration  Write Duration
+Table                                       Page Hit   Page Read  Page Dirty      Read Rate     Write Rate   Read Duration  Write Duration
 ---------------------------------------------------------------------------------------------------------------------------------------------
 postgres.pg_catalog.pg_attribute             145.000      14.000       0.000  122.070 MiB/s    0.000 MiB/s         0.118 s         0.000 s
 postgres.public.pgbench_history              145.000       2.000       4.000    8.351 MiB/s   16.702 MiB/s         0.012 s         0.000 s
@@ -1936,7 +1936,7 @@ postgres.statsrepo.column_20221219              1        0        1       0.0   
 
 /** Vacuum I/O Statistics (Average) **/
 -----------------------------------
-Table                                       Page Hit   Page Miss  Page Dirty      Read Rate     Write Rate   Read Duration  Write Duration
+Table                                       Page Hit   Page Read  Page Dirty      Read Rate     Write Rate   Read Duration  Write Duration
 ---------------------------------------------------------------------------------------------------------------------------------------------
 postgres.pg_catalog.pg_attribute             145.000      14.000       0.000  122.070 MiB/s    0.000 MiB/s         0.118 s         0.000 s
 postgres.public.pgbench_history              145.000       2.000       4.000    8.351 MiB/s   16.702 MiB/s         0.012 s         0.000 s
@@ -1997,7 +1997,7 @@ postgres.statsrepo.column_20221219              1        0        1       0.0   
 
 /** Vacuum I/O Statistics (Average) **/
 -----------------------------------
-Table                                       Page Hit   Page Miss  Page Dirty      Read Rate     Write Rate   Read Duration  Write Duration
+Table                                       Page Hit   Page Read  Page Dirty      Read Rate     Write Rate   Read Duration  Write Duration
 ---------------------------------------------------------------------------------------------------------------------------------------------
 postgres.pg_catalog.pg_attribute             145.000      14.000       0.000  122.070 MiB/s    0.000 MiB/s         0.118 s         0.000 s
 postgres.public.pgbench_history              145.000       2.000       4.000    8.351 MiB/s   16.702 MiB/s         0.012 s         0.000 s
@@ -2058,7 +2058,7 @@ postgres.statsrepo.column_20221219              1        0        1       0.0   
 
 /** Vacuum I/O Statistics (Average) **/
 -----------------------------------
-Table                                       Page Hit   Page Miss  Page Dirty      Read Rate     Write Rate   Read Duration  Write Duration
+Table                                       Page Hit   Page Read  Page Dirty      Read Rate     Write Rate   Read Duration  Write Duration
 ---------------------------------------------------------------------------------------------------------------------------------------------
 postgres.pg_catalog.pg_attribute             145.000      14.000       0.000  122.070 MiB/s    0.000 MiB/s         0.118 s         0.000 s
 postgres.public.pgbench_history              145.000       2.000       4.000    8.351 MiB/s   16.702 MiB/s         0.012 s         0.000 s
@@ -3582,7 +3582,7 @@ postgres.statsrepo.column_20221219              1        0        1       0.0   
 
 /** Vacuum I/O Statistics (Average) **/
 -----------------------------------
-Table                                       Page Hit   Page Miss  Page Dirty      Read Rate     Write Rate   Read Duration  Write Duration
+Table                                       Page Hit   Page Read  Page Dirty      Read Rate     Write Rate   Read Duration  Write Duration
 ---------------------------------------------------------------------------------------------------------------------------------------------
 postgres.pg_catalog.pg_attribute             145.000      14.000       0.000  122.070 MiB/s    0.000 MiB/s         0.118 s         0.000 s
 postgres.public.pgbench_history              145.000       2.000       4.000    8.351 MiB/s   16.702 MiB/s         0.012 s         0.000 s
@@ -4058,7 +4058,7 @@ postgres.statsrepo.column_20221219              1        0        1       0.0   
 
 /** Vacuum I/O Statistics (Average) **/
 -----------------------------------
-Table                                       Page Hit   Page Miss  Page Dirty      Read Rate     Write Rate   Read Duration  Write Duration
+Table                                       Page Hit   Page Read  Page Dirty      Read Rate     Write Rate   Read Duration  Write Duration
 ---------------------------------------------------------------------------------------------------------------------------------------------
 postgres.pg_catalog.pg_attribute             145.000      14.000       0.000  122.070 MiB/s    0.000 MiB/s         0.118 s         0.000 s
 postgres.public.pgbench_history              145.000       2.000       4.000    8.351 MiB/s   16.702 MiB/s         0.012 s         0.000 s
@@ -4534,7 +4534,7 @@ postgres.statsrepo.column_20221219              1        0        1       0.0   
 
 /** Vacuum I/O Statistics (Average) **/
 -----------------------------------
-Table                                       Page Hit   Page Miss  Page Dirty      Read Rate     Write Rate   Read Duration  Write Duration
+Table                                       Page Hit   Page Read  Page Dirty      Read Rate     Write Rate   Read Duration  Write Duration
 ---------------------------------------------------------------------------------------------------------------------------------------------
 postgres.pg_catalog.pg_attribute             145.000      14.000       0.000  122.070 MiB/s    0.000 MiB/s         0.118 s         0.000 s
 postgres.public.pgbench_history              145.000       2.000       4.000    8.351 MiB/s   16.702 MiB/s         0.012 s         0.000 s
@@ -5010,7 +5010,7 @@ postgres.statsrepo.column_20221219              1        0        1       0.0   
 
 /** Vacuum I/O Statistics (Average) **/
 -----------------------------------
-Table                                       Page Hit   Page Miss  Page Dirty      Read Rate     Write Rate   Read Duration  Write Duration
+Table                                       Page Hit   Page Read  Page Dirty      Read Rate     Write Rate   Read Duration  Write Duration
 ---------------------------------------------------------------------------------------------------------------------------------------------
 postgres.pg_catalog.pg_attribute             145.000      14.000       0.000  122.070 MiB/s    0.000 MiB/s         0.118 s         0.000 s
 postgres.public.pgbench_history              145.000       2.000       4.000    8.351 MiB/s   16.702 MiB/s         0.012 s         0.000 s
@@ -5486,7 +5486,7 @@ postgres.statsrepo.column_20221219              1        0        1       0.0   
 
 /** Vacuum I/O Statistics (Average) **/
 -----------------------------------
-Table                                       Page Hit   Page Miss  Page Dirty      Read Rate     Write Rate   Read Duration  Write Duration
+Table                                       Page Hit   Page Read  Page Dirty      Read Rate     Write Rate   Read Duration  Write Duration
 ---------------------------------------------------------------------------------------------------------------------------------------------
 postgres.pg_catalog.pg_attribute             145.000      14.000       0.000  122.070 MiB/s    0.000 MiB/s         0.118 s         0.000 s
 postgres.public.pgbench_history              145.000       2.000       4.000    8.351 MiB/s   16.702 MiB/s         0.012 s         0.000 s
@@ -5962,7 +5962,7 @@ postgres.statsrepo.column_20221219              1        0        1       0.0   
 
 /** Vacuum I/O Statistics (Average) **/
 -----------------------------------
-Table                                       Page Hit   Page Miss  Page Dirty      Read Rate     Write Rate   Read Duration  Write Duration
+Table                                       Page Hit   Page Read  Page Dirty      Read Rate     Write Rate   Read Duration  Write Duration
 ---------------------------------------------------------------------------------------------------------------------------------------------
 postgres.pg_catalog.pg_attribute             145.000      14.000       0.000  122.070 MiB/s    0.000 MiB/s         0.118 s         0.000 s
 postgres.public.pgbench_history              145.000       2.000       4.000    8.351 MiB/s   16.702 MiB/s         0.012 s         0.000 s
@@ -6635,7 +6635,7 @@ postgres.statsrepo.column_20221219              1        0        1       0.0   
 
 /** Vacuum I/O Statistics (Average) **/
 -----------------------------------
-Table                                       Page Hit   Page Miss  Page Dirty      Read Rate     Write Rate   Read Duration  Write Duration
+Table                                       Page Hit   Page Read  Page Dirty      Read Rate     Write Rate   Read Duration  Write Duration
 ---------------------------------------------------------------------------------------------------------------------------------------------
 postgres.pg_catalog.pg_attribute             145.000      14.000       0.000  122.070 MiB/s    0.000 MiB/s         0.118 s         0.000 s
 postgres.public.pgbench_history              145.000       2.000       4.000    8.351 MiB/s   16.702 MiB/s         0.012 s         0.000 s
