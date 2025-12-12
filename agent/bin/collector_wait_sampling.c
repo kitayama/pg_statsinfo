@@ -1,7 +1,7 @@
 /*
  * collector_wait_sampling.c:
  *
- * Copyright (c) 2009-2025, NIPPON TELEGRAPH AND TELEPHONE CORPORATION
+ * Copyright (c) 2009-2025, NTT, Inc.
  */
 
 #include "pg_statsinfod.h"
