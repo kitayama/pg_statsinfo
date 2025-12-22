@@ -3610,9 +3610,9 @@ $$
 		SELECT
 			s.snapid,
 			pg_catalog.to_char(s.time, 'YYYY-MM-DD HH24:MI') AS timestamp,
-			b.buffers_clean - pg_catalog.lag(b.buffers_clean) OVER w AS bgwriter_write,
-			i.writes - pg_catalog.lag(i.writes) OVER w AS backend_write,
-			i.fsyncs - pg_catalog.lag(i.fsyncs) OVER w AS backend_fsync,
+			ibw.write_bytes - pg_catalog.lag(ibw.write_bytes) OVER w AS bgwriter_write,
+			icb.write_bytes - pg_catalog.lag(icb.write_bytes) OVER w AS backend_write,
+			icb.fsyncs - pg_catalog.lag(icb.fsyncs) OVER w AS backend_fsync,
 			b.maxwritten_clean - pg_catalog.lag(b.maxwritten_clean) OVER w AS bgwriter_stopscan,
 			b.buffers_alloc - pg_catalog.lag(b.buffers_alloc) OVER w AS buffer_alloc,
 			s.time - pg_catalog.lag(s.time) OVER w AS duration
@@ -3621,7 +3621,17 @@ $$
 			statsrepo.snapshot s,
 			(SELECT
 				snapid,
-				writes,
+				write_bytes
+			FROM
+				statsrepo.stat_io
+			WHERE
+				backend_type = 'background writer'
+				AND object = 'relation'
+				AND context = 'normal'
+			) ibw,
+			(SELECT
+				snapid,
+				write_bytes,
 				fsyncs
 			FROM
 				statsrepo.stat_io
@@ -3629,11 +3639,12 @@ $$
 				backend_type = 'client backend'
 				AND object = 'relation'
 				AND context = 'normal'
-			) i
+			) icb
 		WHERE
 			b.snapid BETWEEN $1 AND $2
 			AND b.snapid = s.snapid
-			AND i.snapid = s.snapid
+			AND ibw.snapid = s.snapid
+			AND icb.snapid = s.snapid
 			AND s.instid = (SELECT instid FROM statsrepo.snapshot WHERE snapid = $2)
 		WINDOW w AS (ORDER BY s.snapid)
 		ORDER BY
@@ -3659,10 +3670,10 @@ CREATE OR REPLACE FUNCTION statsrepo.get_bgwriter_stats(
 ) RETURNS SETOF record AS
 $$
 	SELECT
-		pg_catalog.round(pg_catalog.avg(bgwriter_write_tps), 3),
-		pg_catalog.round(pg_catalog.max(bgwriter_write_tps), 3),
-		pg_catalog.round(pg_catalog.avg(backend_write_tps), 3),
-		pg_catalog.round(pg_catalog.max(backend_write_tps), 3),
+		pg_catalog.round(pg_catalog.avg(bgwriter_write_tps) / 1024, 3),
+		pg_catalog.round(pg_catalog.max(bgwriter_write_tps) / 1024, 3),
+		pg_catalog.round(pg_catalog.avg(backend_write_tps) / 1024, 3),
+		pg_catalog.round(pg_catalog.max(backend_write_tps) / 1024, 3),
 		pg_catalog.round(pg_catalog.avg(backend_fsync_tps), 3),
 		pg_catalog.round(pg_catalog.max(backend_fsync_tps), 3),
 		pg_catalog.round(pg_catalog.avg(bgwriter_stopscan_tps), 3),

@@ -81,15 +81,19 @@ $$
 	--
 	-- Data for Name: bgwriter; Type: TABLE DATA; Schema: statsrepo; Owner: postgres
 	--
-	INSERT INTO statsrepo.bgwriter VALUES ($6, 0, 0, 0);
-	INSERT INTO statsrepo.bgwriter VALUES ($6 + 1, 600, 6, 60000);
-	INSERT INTO statsrepo.bgwriter VALUES ($6 + 2, 2400, 24, 240000);
-	INSERT INTO statsrepo.bgwriter VALUES ($6 + 3, 3600, 36, 360000);
+	INSERT INTO statsrepo.bgwriter (snapid) VALUES ($6);
+	INSERT INTO statsrepo.bgwriter (snapid) VALUES ($6 + 1);
+	INSERT INTO statsrepo.bgwriter (snapid) VALUES ($6 + 2);
+	INSERT INTO statsrepo.bgwriter (snapid) VALUES ($6 + 3);
 
-	INSERT INTO statsrepo.stat_io (snapid, backend_type, object, context, writes, fsyncs) VALUES ($6 + 0, 'client backend', 'relation', 'normal', 0, 0);
-	INSERT INTO statsrepo.stat_io (snapid, backend_type, object, context, writes, fsyncs) VALUES ($6 + 1, 'client backend', 'relation', 'normal', 6000, 60);
-	INSERT INTO statsrepo.stat_io (snapid, backend_type, object, context, writes, fsyncs) VALUES ($6 + 2, 'client backend', 'relation', 'normal', 24000, 240);
-	INSERT INTO statsrepo.stat_io (snapid, backend_type, object, context, writes, fsyncs) VALUES ($6 + 3, 'client backend', 'relation', 'normal', 36000, 360);
+	INSERT INTO statsrepo.stat_io (snapid, backend_type, object, context, write_bytes, fsyncs) VALUES ($6 + 0, 'background writer', 'relation', 'normal', 0, 0);
+	INSERT INTO statsrepo.stat_io (snapid, backend_type, object, context, write_bytes, fsyncs) VALUES ($6 + 1, 'background writer', 'relation', 'normal', 600*8192, 60);
+	INSERT INTO statsrepo.stat_io (snapid, backend_type, object, context, write_bytes, fsyncs) VALUES ($6 + 2, 'background writer', 'relation', 'normal', 2400*8192, 240);
+	INSERT INTO statsrepo.stat_io (snapid, backend_type, object, context, write_bytes, fsyncs) VALUES ($6 + 3, 'background writer', 'relation', 'normal', 3600*8192, 360);
+	INSERT INTO statsrepo.stat_io (snapid, backend_type, object, context, write_bytes, fsyncs) VALUES ($6 + 0, 'client backend', 'relation', 'normal', 0, 0);
+	INSERT INTO statsrepo.stat_io (snapid, backend_type, object, context, write_bytes, fsyncs) VALUES ($6 + 1, 'client backend', 'relation', 'normal', 6000*8192, 60);
+	INSERT INTO statsrepo.stat_io (snapid, backend_type, object, context, write_bytes, fsyncs) VALUES ($6 + 2, 'client backend', 'relation', 'normal', 24000*8192, 240);
+	INSERT INTO statsrepo.stat_io (snapid, backend_type, object, context, write_bytes, fsyncs) VALUES ($6 + 3, 'client backend', 'relation', 'normal', 36000*8192, 360);
 
 	INSERT INTO statsrepo.stat_io (snapid, backend_type, object, context, writes, fsyncs, write_time, fsync_time) VALUES ($6 + 0, 'client backend', 'wal', 'normal', 146, 0, 0,0);
 	INSERT INTO statsrepo.stat_io (snapid, backend_type, object, context, writes, fsyncs, write_time, fsync_time) VALUES ($6 + 1, 'client backend', 'wal', 'normal', 521, 0, 0, 0);

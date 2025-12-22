@@ -1345,6 +1345,9 @@ pg_statsinfo 17 からの変更点は以下の通りです。
   - PostgreSQL 18に対応 (pg_statsinfo 18は PostgreSQL 18のみをサポートします)
   - PostgreSQL の仕様変更により、WALの統計情報の中でI/Oの統計を提供するビューが pg_stat_wal から pg_stat_io に変更されました。
   その結果、本バージョンの pg_statsinfo では、これらの値が以前のバージョンと異なる場合があります。
+  - PostgreSQL の pg_stat_io 仕様変更により、読み込み・書き込み・拡張のI/O統計情報がバッファ数からバイト数に変更されました。
+  その結果、簡易レポートに出力される「BGWriter Statistics」のバックグラウンドライタおよびバックエンドに関する書き込み情報は、
+  1秒あたりのバッファ数(buffers/s)からバイト数(KiB/s)に変更されました。
 
 ## 詳細情報
 

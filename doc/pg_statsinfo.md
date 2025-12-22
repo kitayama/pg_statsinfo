@@ -1377,6 +1377,8 @@ Following changes have been made after pg_statsinfo 17.
   - Supports PostgreSQL 18 (pg_statsinfo 18 supports only PostgreSQL 18).
   - Due to a change in PostgreSQL specifications, the view that provides I/O statistics among WAL statistics has been changed from pg_stat_wal to pg_stat_io.
     As a result, in this version of pg_statsinfo, the values may differ from those in previous versions.
+  - Due to a change in PostgreSQL's pg_stat_io specification, the I/O statistics for reads, writes, and extensions have been changed from the number of buffers to the number of bytes.
+    As a result, the write information for background writer and backends in the "BGWriter Statistics" output in the simple report has been changed from buffers per second (buffers/s) to bytes per second (KiB/s).
 
 ## Detailed information
 
