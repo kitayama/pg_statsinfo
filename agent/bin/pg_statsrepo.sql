@@ -151,11 +151,11 @@ CREATE TABLE statsrepo.table
 	last_autovacuum		timestamptz,
 	last_analyze		timestamptz,
 	last_autoanalyze	timestamptz,
-	PRIMARY KEY (snapid, dbid, tbl),
+	PRIMARY KEY (snapid, dbid, tbl, date),
 	FOREIGN KEY (snapid) REFERENCES statsrepo.snapshot (snapid) ON DELETE CASCADE,
 	FOREIGN KEY (snapid, dbid) REFERENCES statsrepo.database (snapid, dbid),
 	FOREIGN KEY (snapid, dbid, nsp) REFERENCES statsrepo.schema (snapid, dbid, nsp)
-);
+) PARTITION BY RANGE (date);
 
 CREATE TABLE statsrepo.index
 (
@@ -182,10 +182,10 @@ CREATE TABLE statsrepo.index
 	idx_tup_fetch	bigint,
 	idx_blks_read	bigint,
 	idx_blks_hit	bigint,
-	PRIMARY KEY (snapid, dbid, idx),
+	PRIMARY KEY (snapid, dbid, idx, date),
 	FOREIGN KEY (snapid) REFERENCES statsrepo.snapshot (snapid) ON DELETE CASCADE,
 	FOREIGN KEY (snapid, dbid) REFERENCES statsrepo.database (snapid, dbid)
-);
+) PARTITION BY RANGE (date);
 
 CREATE TABLE statsrepo.column
 (
@@ -203,10 +203,10 @@ CREATE TABLE statsrepo.column
 	avg_width		integer,
 	n_distinct		real,
 	correlation		real,
-	PRIMARY KEY (snapid, dbid, tbl, attnum),
+	PRIMARY KEY (snapid, dbid, tbl, attnum, date),
 	FOREIGN KEY (snapid) REFERENCES statsrepo.snapshot (snapid) ON DELETE CASCADE,
 	FOREIGN KEY (snapid, dbid) REFERENCES statsrepo.database (snapid, dbid)
-);
+) PARTITION BY RANGE (date);
 
 CREATE TABLE statsrepo.activity
 (
@@ -786,7 +786,9 @@ CREATE TABLE statsrepo.log
 	leader_pid			integer,
 	query_id			bigint,
 	FOREIGN KEY (instid) REFERENCES statsrepo.instance (instid) ON DELETE CASCADE
-);
+) PARTITION BY RANGE (timestamp);
+
+CREATE INDEX ON statsrepo.log (timestamp);
 
 CREATE TABLE statsrepo.rusage
 (
@@ -4333,16 +4335,9 @@ BEGIN
 	/* create child table */
 	IF NOT FOUND THEN
 		EXECUTE 'CREATE TABLE statsrepo.' || child_name
-			|| ' (LIKE statsrepo.' || parent_name
-			|| ' INCLUDING INDEXES INCLUDING DEFAULTS INCLUDING CONSTRAINTS,'
-			|| ' CHECK (' || $3 || ' >= DATE ''' || pg_catalog.to_char($2, 'YYYY-MM-DD') || ''''
-			|| ' AND ' || $3 || ' < DATE ''' || pg_catalog.to_char($2 + 1, 'YYYY-MM-DD') || ''')'
-			|| ' ) INHERITS (statsrepo.' || parent_name || ')';
-
-		/* add foreign key constraint */
-		FOR condef IN SELECT statsrepo.get_constraintdef($1) LOOP
-		    EXECUTE 'ALTER TABLE statsrepo.' || child_name || ' ADD ' || condef;
-		END LOOP;
+			|| ' PARTITION OF statsrepo.' || parent_name
+			|| ' FOR VALUES FROM (''' || pg_catalog.to_char($2, 'YYYY-MM-DD') || ''')'
+			|| ' TO (''' || pg_catalog.to_char($2 + 1, 'YYYY-MM-DD') || ''')';
 	END IF;
 END;
 $$ LANGUAGE plpgsql;
@@ -4396,34 +4391,6 @@ BEGIN
 	RESET client_min_messages;
 END;
 $$ LANGUAGE plpgsql;
-
--- function to insert partition-table for snapshot
-CREATE FUNCTION statsrepo.partition_snapshot_insert() RETURNS TRIGGER AS
-$$
-DECLARE
-BEGIN
-	EXECUTE 'INSERT INTO statsrepo.'
-		|| TG_TABLE_NAME || pg_catalog.to_char(new.date, '_YYYYMMDD') || ' VALUES(($1).*)' USING new;
-	RETURN NULL;
-END;
-$$ LANGUAGE plpgsql;
-
--- function to insert partition-table for log
-CREATE FUNCTION statsrepo.partition_repolog_insert() RETURNS TRIGGER AS
-$$
-DECLARE
-BEGIN
-	EXECUTE 'INSERT INTO statsrepo.'
-		|| TG_TABLE_NAME || pg_catalog.to_char(new.timestamp, '_YYYYMMDD') || ' VALUES(($1).*)' USING new;
-	RETURN NULL;
-END;
-$$ LANGUAGE plpgsql;
-
--- trigger registration for partitioning
-CREATE TRIGGER partition_insert_table BEFORE INSERT ON statsrepo.table FOR EACH ROW EXECUTE PROCEDURE statsrepo.partition_snapshot_insert();
-CREATE TRIGGER partition_insert_index BEFORE INSERT ON statsrepo.index FOR EACH ROW EXECUTE PROCEDURE statsrepo.partition_snapshot_insert();
-CREATE TRIGGER partition_insert_column BEFORE INSERT ON statsrepo.column FOR EACH ROW EXECUTE PROCEDURE statsrepo.partition_snapshot_insert();
-CREATE TRIGGER partition_insert_log BEFORE INSERT ON statsrepo.log FOR EACH ROW EXECUTE PROCEDURE statsrepo.partition_repolog_insert();
 
 -- del_snapshot2(time) - delete snapshots older than the specified timestamp.
 CREATE FUNCTION statsrepo.del_snapshot2(timestamptz) RETURNS void AS
