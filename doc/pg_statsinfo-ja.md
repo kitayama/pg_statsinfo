@@ -1487,7 +1487,7 @@ pg_statsinfo](https://www.pgcon.org/2010/schedule/events/216.en.html)
 
 <div>
 
-Copyright (c) 2009-2025, NTT, Inc.
+Copyright (c) 2009-2026, NTT, Inc.
 
 </div>
 

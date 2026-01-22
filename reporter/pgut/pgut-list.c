@@ -2,7 +2,7 @@
  *
  * pgut-list.c : copied from postgres/nodes/list.c
  *
- * Copyright (c) 2009-2025, NTT, Inc.
+ * Copyright (c) 2009-2026, NTT, Inc.
  * Portions Copyright (c) 1996-2025, PostgreSQL Global Development Group
  * Portions Copyright (c) 1994, Regents of the University of California
  *

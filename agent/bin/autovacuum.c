@@ -1,7 +1,7 @@
 /*
  * autovacuum.c : parse auto-vacuum and auto-analyze messages
  *
- * Copyright (c) 2009-2025, NTT, Inc.
+ * Copyright (c) 2009-2026, NTT, Inc.
  */
 
 #include "pg_statsinfod.h"
