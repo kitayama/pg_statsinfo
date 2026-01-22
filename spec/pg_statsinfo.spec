@@ -3,13 +3,15 @@
 
 # Original declaration for pg_statsinfo rpmbuild #
 
-%define _pgdir   /usr/pgsql-17
-%define _bindir  %{_pgdir}/bin
-%define _libdir  %{_pgdir}/lib
-%define _datadir %{_pgdir}/share
+%global pgdir   /usr/pgsql-18
+%global pg_bindir  %{pgdir}/bin
+%global pg_libdir  %{pgdir}/lib
+%global pg_datadir %{pgdir}/share
 
-%global packageversion 17
+
+%global packageversion 18
 %global tmpfilesconf spec/pg_statsinfo-tmpfiles.d.conf
+%global __brp_check_rpaths %{nil}
 
 ## Set general information for pg_statsinfo.
 Name:       pg_statsinfo
@@ -23,7 +25,7 @@ Source0:    %{name}-%{version}.tar.gz
 BuildRoot:  %{_tmppath}/%{name}-%{version}-%{release}-%(%{__id_u} -n)
 
 ## We use postgresql-devel package
-BuildRequires:  postgresql17-devel
+BuildRequires:  postgresql18-devel
 %if %{rhel} == 7
 BuildRequires:  llvm-toolset-7 llvm5.0
 %endif
@@ -33,13 +35,16 @@ BuildRequires:  llvm >= 6
 %if %{rhel} == 9
 BuildRequires:  llvm >= 15
 %endif
+%if %{rhel} == 10
+BuildRequires:  llvm >= 17
+%endif
 
 %description
 pg_statsinfo monitors an instance of PostgreSQL server and gather
 the statistics and activities of the server as snapshots.
 
 %package llvmjit
-Requires: postgresql17-llvmjit
+Requires: postgresql18-llvmjit
 Requires: pg_statsinfo = %{version}
 Summary:  Just-in-time compilation support for pg_statsinfo
 
@@ -52,12 +57,12 @@ Just-in-time compilation support for pg_statsinfo
 
 ## Set variables for build environment
 %build
-USE_PGXS=1 make %{?_smp_mflags}
+make USE_PGXS=1 PG_CONFIG=%{pg_bindir}/pg_config %{?_smp_mflags}
 
 ## Set variables for install
 %install
 rm -rf %{buildroot}
-USE_PGXS=1 make DESTDIR=%{buildroot} install
+make USE_PGXS=1 PG_CONFIG=%{pg_bindir}/pg_config DESTDIR=%{buildroot} install
 %{__install} -d -m 755 %{buildroot}/%{_rundir}/%{name}
 %{__mkdir} -p %{buildroot}/%{_tmpfilesdir}
 %{__install} -m 0644 %{tmpfilesconf} %{buildroot}/%{_tmpfilesdir}/%{name}-%{packageversion}.conf
@@ -68,27 +73,27 @@ rm -rf %{buildroot}
 ## Set files for this packages
 %files
 %defattr(-,root,root)
-%{_bindir}/pg_statsinfo
-%{_bindir}/pg_statsinfod
-%{_bindir}/archive_pglog.sh
-%{_libdir}/pg_statsinfo.so
-%{_datadir}/contrib/pg_statsrepo.sql
-%{_datadir}/contrib/pg_statsrepo_alert.sql
-%{_datadir}/contrib/uninstall_pg_statsrepo.sql
-%{_datadir}/contrib/pg_statsinfo.sql
-%{_datadir}/contrib/uninstall_pg_statsinfo.sql
+%{pg_bindir}/pg_statsinfo
+%{pg_bindir}/pg_statsinfod
+%{pg_bindir}/archive_pglog.sh
+%{pg_libdir}/pg_statsinfo.so
+%{pg_datadir}/contrib/pg_statsrepo.sql
+%{pg_datadir}/contrib/pg_statsrepo_alert.sql
+%{pg_datadir}/contrib/uninstall_pg_statsrepo.sql
+%{pg_datadir}/contrib/pg_statsinfo.sql
+%{pg_datadir}/contrib/uninstall_pg_statsinfo.sql
 %{_tmpfilesdir}/%{name}-%{packageversion}.conf
 %attr(755,postgres,postgres) %dir %{_rundir}/%{name}
 
 %files llvmjit
 %defattr(-,root,root)
-%{_libdir}/bitcode/pg_statsinfo.index.bc
-%{_libdir}/bitcode/pg_statsinfo/libstatsinfo.bc
-%{_libdir}/bitcode/pg_statsinfo/last_xact_activity.bc
-%{_libdir}/bitcode/pg_statsinfo/pg_control.bc
-%{_libdir}/bitcode/pg_statsinfo/port.bc
-%{_libdir}/bitcode/pg_statsinfo/wait_sampling.bc
-%{_libdir}/bitcode/pg_statsinfo/pgut/pgut-spi.bc
+%{pg_libdir}/bitcode/pg_statsinfo.index.bc
+%{pg_libdir}/bitcode/pg_statsinfo/libstatsinfo.bc
+%{pg_libdir}/bitcode/pg_statsinfo/last_xact_activity.bc
+%{pg_libdir}/bitcode/pg_statsinfo/pg_control.bc
+%{pg_libdir}/bitcode/pg_statsinfo/port.bc
+%{pg_libdir}/bitcode/pg_statsinfo/wait_sampling.bc
+%{pg_libdir}/bitcode/pg_statsinfo/pgut/pgut-spi.bc
 
 ## Script to run just before installing the package
 %pre
@@ -134,6 +139,8 @@ fi
 
 # History of pg_statsinfo-v15 RPM.
 %changelog
+* Thu Jan 22 2026 - NTT OSS Center 18.0-1
+- pg_stats_reporter 18.0 released
 * Wed Feb 19 2025 - NTT OSS Center 17.0-1
 - pg_stats_reporter 17.0 released
 * Thu Feb 29 2024 - NTT OSS Center 16.0-1
