@@ -41,6 +41,7 @@
 #include "access/parallel.h"
 #include "executor/executor.h"
 #include "optimizer/planner.h"
+#include "replication/walsender.h"
 #include "postmaster/autovacuum.h"
 #include "storage/fd.h"
 #include "storage/ipc.h"
@@ -1884,6 +1885,7 @@ ru_memsize(void)
 static Size
 ru_queryids_array_size(void)
 {
-	return (sizeof(uint64) * (MaxConnections + autovacuum_max_workers + 1
+	return (sizeof(uint64) * (MaxConnections + autovacuum_worker_slots + 1
+							+ max_wal_senders
 							+ max_worker_processes + 1));
 }
