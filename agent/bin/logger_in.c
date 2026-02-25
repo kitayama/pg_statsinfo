@@ -6,7 +6,6 @@
 
 #include "pg_statsinfod.h"
 
-static bool badcsv(int column, const char *message);
 static int MatchText(const char *t, size_t tlen,
 					 const char *p, size_t plen, List **params);
 
@@ -14,7 +13,7 @@ static int MatchText(const char *t, size_t tlen,
  * logger_next
  */
 
-#define CSV_READ_RETRY_MAX				3
+#define CSV_READ_RETRY_MAX				150
 
 bool
 read_csv(FILE *fp, StringInfo buf, int ncolumns, size_t *columns)
@@ -61,11 +60,13 @@ retry:
 	{
 		if (retry_count < CSV_READ_RETRY_MAX)
 		{
-			usleep(100 * 1000);	/* 100ms */
+			usleep(200 * 1000);	/* 200ms */
 			retry_count++;
 			goto retry;
 		}	
-		return badcsv(column + 1, buf->data);
+		ereport(WARNING, (errmsg("Timeout while reading line. %d: %s",
+								 column + 1, buf->data)));
+		return false;
 	}
 	
 	/* split log with comma */
@@ -113,7 +114,9 @@ retry:
 				}
 				else
 				{
-					return badcsv(column + 1, buf->data);
+					ereport(WARNING, (errmsg("Double quote not properly closed. %d: %s",
+											 column + 1, buf->data)));
+					return false;
 				}
 			}
 		}
@@ -123,7 +126,9 @@ retry:
 			next = strpbrk(buffer, ",\n");
 			if (next == NULL)
 			{
-				return badcsv(column + 1, buf->data);
+				ereport(WARNING, (errmsg("Field end not found. %d: %s",
+										 column + 1, buf->data)));
+				return false;
 			}
 			else
 			{
@@ -135,19 +140,13 @@ retry:
 
 	/* throw an error if column number does not reach a necessary number. */
 	if (column < ncolumns)
-		return badcsv(column + 1, buf->data);
+	{
+		ereport(WARNING, (errmsg("Insufficient number of fields. %d: %s",
+								 column + 1, buf->data)));
+		return false;
+	}
 
 	return true;
-}
-
-/*
- * badcsv - always return false.
- */
-static bool
-badcsv(int column, const char *message)
-{
-	elog(WARNING, "cannot parse csvlog column %d: %s", column, message);
-	return false;
 }
 
 #define LIKE_TRUE						1
