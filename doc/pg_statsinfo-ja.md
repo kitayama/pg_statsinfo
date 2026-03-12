@@ -439,10 +439,10 @@ statsinfo.snapshot(text DEFAULT NULL) を実行して下さい。
 スナップショットの手動削除は監視対象インスタンスに対して、関数 statsinfo.maintenance(timestamptz)
 を実行して下さい。 引数で指定した時刻より古いスナップショットが削除されます。
 
-例: 取得日時が 2011-02-01 07:00:00
+例: 取得日時が 2014-02-01 07:00:00
     より古いスナップショットを削除します。
 
-    $ psql -d postgres -c "SELECT statsinfo.maintenance('2010-02-01 07:00:00'::timestamptz);"
+    $ psql -d postgres -c "SELECT statsinfo.maintenance('2014-02-01 07:00:00'::timestamptz);"
 
 なお、手動削除は非同期で行われます。上記のコマンド完了時にスナップショット削除が完了していない場合があります。
 
