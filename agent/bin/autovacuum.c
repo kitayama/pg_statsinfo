@@ -739,8 +739,8 @@ remove_avc_request(AVCancelRequest *entry)
 	if (!entry)
 		return;
 
+	avc_request = list_delete_ptr(avc_request, entry);
 	free(entry->w_pid);
 	free(entry->query);
 	free(entry);
-	avc_request = list_delete_ptr(avc_request, entry);
 }
